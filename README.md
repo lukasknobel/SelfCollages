@@ -1,7 +1,7 @@
 # Semantic Counting from Self-Collages
 
 This repository contains the code for the paper "Semantic Counting from Self-Collages" and allows training counting models in a self-supervised manner using Self-Collages.
-We provide an [example notebook](SelfCollages.ipynb) to experiment with the proposed method.
+We provide an [example notebook](SelfCollages.ipynb) to experiment with the proposed method. Details can be found in the paper. [[`Paper`](https://arxiv.org/abs/2307.08727)]
 
 <div>
   <img width="100%" alt="Semantic Counting from Self-Collages illustration" src="images/arch.gif">
@@ -229,6 +229,17 @@ jupyter notebook SelfCollages.ipynb
 ```
 
 You might want to increase the maximum amount of memory that can be used by the notebook. This can be done with the argument ```--NotebookApp.max_buffer_size=X``` where ```X``` is the maximum amount of memory in bytes.
+
+# Citation
+If you find this repository useful, please consider citing our paper:
+```
+@article{knobel2023semantic,
+      title={Semantic Counting from Self-Collages}, 
+      author={Lukas Knobel and Tengda Han and Yuki M. Asano},
+      journal={arXiv preprint arXiv:2307.08727},
+      year={2023}
+}
+```
 
 # Licensing
 The code is licensed under the [MIT License](LICENSE.txt) except for code taken from other sources, where we specify the source at the beginning of the file. 
