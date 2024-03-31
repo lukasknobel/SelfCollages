@@ -2,7 +2,7 @@ import enum
 
 
 class ModelTypes(enum.Enum):
-    UnCo = 0
+    UnCounTR = 0
 
 
 class BackboneTypes(enum.Enum):

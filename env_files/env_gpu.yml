@@ -1,4 +1,4 @@
-name: unco
+name: uncountr
 channels:
   - pytorch
   - nvidia

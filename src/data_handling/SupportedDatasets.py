@@ -12,3 +12,4 @@ class SupportedEvalDatasets(Enum):
     FSC147_medium = 5
     FSC147_high = 6
     MSO_few_shot = 7
+    CARPK = 9

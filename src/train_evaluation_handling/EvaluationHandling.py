@@ -225,7 +225,7 @@ def evaluate_models_on_datasets(args, base_data_dir, eval_dataset: SupportedEval
 
     if eval_dataset is SupportedEvalDatasets.BaselineDefault:
         eval_datasets = [SupportedEvalDatasets.FSC147, SupportedEvalDatasets.FSC147_low,
-                         SupportedEvalDatasets.FSC147_medium, SupportedEvalDatasets.FSC147_high]
+                         SupportedEvalDatasets.FSC147_medium, SupportedEvalDatasets.FSC147_high, SupportedEvalDatasets.MSO_few_shot, SupportedEvalDatasets.CARPK]
     elif eval_dataset is SupportedEvalDatasets.EvalDefault:
         eval_datasets = [SupportedEvalDatasets.FSC147, SupportedEvalDatasets.FSC147_low]
     else:

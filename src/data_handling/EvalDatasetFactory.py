@@ -2,6 +2,7 @@ from .DatasetSplits import DatasetSplits
 from .SupportedDatasets import SupportedEvalDatasets
 from .datasets.FSCDataset import FSCDataset
 from .datasets.MSODataset import MSODataset
+from .datasets.CARPKDataset import CARPKDataset
 
 
 def create_eval_dataset(eval_dataset, base_data_dir, **kwargs):
@@ -18,6 +19,8 @@ def create_eval_dataset(eval_dataset, base_data_dir, **kwargs):
         eval_dataset = FSCDataset(base_data_dir, use_133_subset=False, min_count=17, max_count=41, **kwargs)
     elif eval_dataset is SupportedEvalDatasets.FSC147_high:
         eval_dataset = FSCDataset(base_data_dir, use_133_subset=False, min_count=41, **kwargs)
+    elif eval_dataset is SupportedEvalDatasets.CARPK:
+        eval_dataset = CARPKDataset(base_data_dir, **kwargs)
     else:
         raise ValueError(f'Evaluation dataset {eval_dataset.name} is not supported')
 

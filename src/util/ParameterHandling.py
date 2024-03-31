@@ -87,7 +87,7 @@ def parse_args(return_defaults=False):
     parser.add_argument('--absolute_max_paste_size', default=220, type=int, help='Absolute maximum size (in pixels) that every object should at most have when using correlated object sizes, refers to an 224x224 image and will be scaled accordingly')
 
     # model
-    parser.add_argument('--model_type', default='UnCo', type=str, help='Type of model used')
+    parser.add_argument('--model_type', default='UnCounTR', type=str, help='Type of model used')
     parser.add_argument('--head', default='linear', type=str, help='Type of head used by the model')
     parser.add_argument('--weights', default='dino', type=str, help='Type of weights used for the backbone')
     # regression

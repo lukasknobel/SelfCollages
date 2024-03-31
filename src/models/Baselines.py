@@ -201,33 +201,18 @@ class DINOBaseline(nn.Module):
         return f'{self.__class__.__name__}_{self.target_img_size}'
 
 
-class FasterRCNNBaseline(nn.Module):
-    def __init__(self, target_img_size, box_score_thresh=0.5):
+class DetectorBaseline(nn.Module):
+    def __init__(self, target_img_size, box_threshold):
         super().__init__()
-        self.model_weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
-        self.box_score_thresh = box_score_thresh
         self.target_img_size = target_img_size
-        self.model = fasterrcnn_resnet50_fpn_v2(weights=self.model_weights, box_score_thresh=self.box_score_thresh)
-        self.model.eval()
+        self.box_threshold = box_threshold
 
-    def forward(self, x, *args, return_boxes=False):
-
-        x = self.model_weights.transforms()(x)
-
-        pred_dicts = self.model(x)
-
-        pred_boxes = [pred_dict['boxes'] for pred_dict in pred_dicts]
-
-        preds = torch.tensor([pred_box.shape[0] for pred_box in pred_boxes], device=x.device)
-
-        if return_boxes:
-            return preds, pred_boxes
-        else:
-            return preds
+    def __repr__(self):
+        return f'{self.__class__.__name__}_{self.box_threshold}_{self.target_img_size}'
 
     def visualise_wrong_preds(self, base_data_dir, base_plot_dir, target_img_size, device, samples=None, batch_size=16,
-                              max_num_plots=10, num_classes=5, num_workers=0, regression=True,
-                              plot_labeled_boxes=False, save_figure=True, show_figure=True):
+                              max_num_plots=10, num_workers=0, plot_labeled_boxes=False, save_figure=True,
+                              show_figure=True):
 
         test_transforms = transforms.Compose([
             transforms.ToTensor(),
@@ -310,8 +295,63 @@ class FasterRCNNBaseline(nn.Module):
                     plt.show()
                 plt.rcParams.update({'font.size': plt.rcParamsDefault['font.size']})
 
-    def __repr__(self):
-        return f'{self.__class__.__name__}_{self.box_score_thresh}_{self.target_img_size}'
+
+class DETRBaseline(DetectorBaseline):
+    def __init__(self, target_img_size, box_threshold=0.5):
+        super().__init__(target_img_size, box_threshold)
+        self.model = torch.hub.load('facebookresearch/detr:main', 'detr_resnet50', pretrained=True)
+        self.model.eval()
+        self.normalise_transform = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+
+    def forward(self, x, *args, return_boxes=False):
+
+        x = self.normalise_transform(x)
+
+        pred_dicts = self.model(x)
+
+        pred_probs = pred_dicts['pred_logits'].softmax(-1)[..., :-1]
+        keep_boxes = pred_probs.max(-1).values > self.box_threshold
+
+        pred_boxes = [self.box_cxcywh_to_xyxy(x, b[keep]) for b, keep in zip(pred_dicts['pred_boxes'], keep_boxes)]
+
+        preds = keep_boxes.float().sum(-1)
+
+        if return_boxes:
+            return preds, pred_boxes
+        else:
+            return preds
+
+    def box_cxcywh_to_xyxy(self, x, b_cxcywh):
+        x_c, y_c, w, h = b_cxcywh.unbind(1)
+        b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
+             (x_c + 0.5 * w), (y_c + 0.5 * h)]
+        b = torch.stack(b, dim=1)
+        b[:, [0, 2]] *= x.shape[-1]
+        b[:, [1, 3]] *= x.shape[-2]
+        return b
+
+
+class FasterRCNNBaseline(DetectorBaseline):
+    def __init__(self, target_img_size, box_score_thresh=0.5):
+        super().__init__(target_img_size, box_score_thresh)
+        self.model_weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
+        self.model = fasterrcnn_resnet50_fpn_v2(weights=self.model_weights, box_score_thresh=self.box_threshold)
+        self.model.eval()
+
+    def forward(self, x, *args, return_boxes=False):
+
+        x = self.model_weights.transforms()(x)
+
+        pred_dicts = self.model(x)
+
+        pred_boxes = [pred_dict['boxes'] for pred_dict in pred_dicts]
+
+        preds = torch.tensor([pred_box.shape[0] for pred_box in pred_boxes], device=x.device)
+
+        if return_boxes:
+            return preds, pred_boxes
+        else:
+            return preds
 
 
 def get_subset_results(base_data_dir, results_dir, paths):
@@ -362,7 +402,7 @@ def test_baselines(args, base_data_dir, models_dir, results_dir, target_img_size
 
     # use FSC train statistics for baselines, the two static baseline uses the mean of the whole and the small (<16 objects) dataset
     models = [AverageBaseline(static_pred=49.9631),
-              DINOBaseline(base_data_dir, target_img_size), FasterRCNNBaseline(target_img_size)]
+              DINOBaseline(base_data_dir, target_img_size), FasterRCNNBaseline(target_img_size), DETRBaseline(target_img_size)]
     seeds = [None for _ in range(len(models))]
 
     missing_model_dirs = []
