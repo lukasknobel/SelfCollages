@@ -248,10 +248,10 @@ You might want to increase the maximum amount of memory that can be used by the 
 # Citation
 If you find this repository useful, please consider citing our paper:
 ```
-@article{knobel2024learning,
+@inproceedings{knobel2024learning,
       title={Learning to Count without Annotations}, 
       author={Lukas Knobel and Tengda Han and Yuki M. Asano},
-      journal={arXiv preprint arXiv:2307.08727},
+      booktitle={CVPR},
       year={2024}
 }
 ```
